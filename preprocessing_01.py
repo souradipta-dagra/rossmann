@@ -4,6 +4,7 @@ import pandas as pd
 import regex as re
 import unicodedata
 
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
 # List of dataset names
 dataset_names = [
     "LMRC", "sts_chile_ns16", "sts_dubai", "sts_222_emr", "sts_india",
@@ -13,19 +14,20 @@ dataset_names = [
 ]
 
 # Load all datasets
-print("Loading datasets...")
+print("Loading Datasets... ")
 dataframes = {name: dataiku.Dataset(name).get_dataframe() for name in dataset_names}
+print("Datasets Loaded! ✅")
 
 # -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
 print("Filtering incomplete and invalid records...")
 
 # Define invalid patterns for 'observation' column
-invalid_observation_patterns = [r"####", r"#NAME?", r"-", r"^\d+$"]
+invalid_patterns = [r"####", r"#NAME?", r"-", r"^\d+$"]
 
 for name, df in dataframes.items():
     if "observation" in df.columns:
         # Remove rows where 'observation' contains invalid values
-        df = df[~df["observation"].astype(str).str.match("|".join(invalid_observation_patterns), na=False)]
+        df = df[~df["observation"].astype(str).str.match("|".join(invalid_patterns), na=False)]
 
     # Drop rows where either 'observation' or 'solution' is missing
     df = df.dropna(subset=["observation", "solution"], how="any")
@@ -133,7 +135,7 @@ print("Merging all dataframes into a single dataset...")
 
 # Combine all DataFrames
 combined_df = pd.concat(dataframes.values(), ignore_index=True)
-combined_df = combined_df[combined_df["database"] != "ENGINEERING_7702"]
+# combined_df = combined_df[combined_df["database"] != "ENGINEERING_7702"]
 
 
 print(f"Merging complete! ✅ Final dataset has {combined_df.shape[0]} rows and {combined_df.shape[1]} columns.")
@@ -199,6 +201,9 @@ for col in ["project", "database", "language"]:
         print(f"Total unique values in '{col}': {len(unique_values)}\n")
     else:
         print(f"⚠️ Column '{col}' not found in merged dataset.\n")
+
+# -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
+combined_df.columns
 
 # -------------------------------------------------------------------------------- NOTEBOOK-CELL: CODE
 print("Ensuring metadata columns exist...")
